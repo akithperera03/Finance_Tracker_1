@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Category Form</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Category Form</h1>
+    <form th:action="@{/categories}" method="post" th:object="${category}">
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" th:field="*{name}" required>
+            <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error"></div>
+        </div>
+        <div>
+            <label for="type">Type:</label>
+            <select id="type" th:field="*{type}" required>
+                <option th:each="type : ${T(com.example.finance.model.TransactionType).values()}"
+                        th:value="${type}" th:text="${type}"></option>
+            </select>
+        </div>
+        <button type="submit">Save</button>
+    </form>
+</div>
+</body>
+</html>
