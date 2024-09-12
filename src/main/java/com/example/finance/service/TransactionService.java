@@ -22,6 +22,10 @@ public class TransactionService {
     }
 
     public void save(Transaction transaction) {
+        System.out.println(transaction.getDate());
         transactionRepository.save(transaction);
+    }
+    public List<Transaction> getTransactionsByUserId(Long userId) {
+        return transactionRepository.findByUserId(userId);
     }
 }

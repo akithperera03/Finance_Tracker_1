@@ -6,6 +6,7 @@ import com.example.finance.model.User;
 import com.example.finance.service.CategoryService;
 import com.example.finance.service.TransactionService;
 import com.example.finance.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,30 +17,24 @@ import java.util.List;
 @Controller
 @RequestMapping("/transactions")
 public class TransactionController {
-
-    private final TransactionService transactionService;
-    private final CategoryService categoryService;
-    private final UserService userService;
-
     @Autowired
-    public TransactionController(TransactionService transactionService, CategoryService categoryService, UserService userService) {
-        this.transactionService = transactionService;
-        this.categoryService = categoryService;
-        this.userService = userService;
-    }
+    TransactionService transactionService;
+    @Autowired
+    CategoryService categoryService;
+    @Autowired
+    UserService userService;
 
-    @GetMapping
-    public String listTransactions(Model model) {
-        model.addAttribute("transactions", transactionService.findAll());
-        return "transaction_history";
-    }
+
 
     @GetMapping("/new")
-    public String showTransactionForm(Model model, @RequestParam Long userId) {
-        User user = userService.findById(userId);
-        if (user == null) {
-            throw new RuntimeException("User not found");
+    public String showTransactionForm(Model model, HttpSession session) {
+        Long userId = (Long) session.getAttribute("user");
+        if (userId == null) {
+            return "redirect:users/login";
         }
+        User user = userService.findById(userId);
+        System.out.println("User Name showTransactionForm: " + user.getUsername());
+        System.out.println("User Name showTransactionForm: " + user.getUsername());
         model.addAttribute("transaction", new Transaction());
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("user", user);
@@ -47,7 +42,11 @@ public class TransactionController {
     }
 
     @PostMapping
-    public String saveTransaction(@ModelAttribute Transaction transaction, @RequestParam Long userId) {
+    public String saveTransaction(@ModelAttribute Transaction transaction,HttpSession session) {
+        Long userId = (Long) session.getAttribute("user");
+        if (userId == null) {
+            return "redirect:users/login";
+        }
         Category category = categoryService.findById(transaction.getCategory().getId());
         User user = userService.findById(userId);
         if (user == null) {
@@ -55,14 +54,18 @@ public class TransactionController {
         }
         transaction.setCategory(category);
         transaction.setUser(user);
+        System.out.println(transaction.getDate());
         transactionService.save(transaction);
-        return "redirect:/transactions";
+        return "redirect:transactions/history";
     }
 
     @GetMapping("/history")
-    public String showTransactionHistory(Model model) {
-        List<Transaction> transactions = transactionService.findAll();
-        model.addAttribute("transactions", transactions);
+    public String showTransactionHistory(Model model,HttpSession session) {
+        Long userId = (Long) session.getAttribute("user");
+        if (userId == null) {
+            return "redirect:users/login";
+        }
+        model.addAttribute("transactions", transactionService.getTransactionsByUserId(userId));
         return "transaction_history";
     }
 }

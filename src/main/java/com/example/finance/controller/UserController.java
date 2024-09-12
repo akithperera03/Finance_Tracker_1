@@ -2,6 +2,7 @@ package com.example.finance.controller;
 
 import com.example.finance.model.User;
 import com.example.finance.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,14 +32,15 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public String showLoginForm() {
+    public String showLoginForm(HttpSession session) {
         return "login";
     }
 
     @PostMapping("/login")
-    public String loginUser(@RequestParam String username, @RequestParam String password, Model model) {
+    public String loginUser(@RequestParam String username, @RequestParam String password, Model model, HttpSession session) {
         User user = userService.authenticate(username, password);
         if (user != null) {
+            session.setAttribute("user", user.getId());
             return "redirect:/dashboard";
         } else {
             model.addAttribute("error", "Invalid username or password");

@@ -2,6 +2,7 @@ package com.example.finance.controller;
 
 import com.example.finance.model.Category;
 import com.example.finance.service.CategoryService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +18,11 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping
-    public String showCategoryManagement(Model model) {
+    public String showCategoryManagement(Model model, HttpSession session) {
+        Long userId = (Long) session.getAttribute("user");
+        if (userId == null) {
+            return "redirect:users/login";
+        }
         List<Category> categories = categoryService.getAllCategories();
         model.addAttribute("categories", categories);
         return "category_management";

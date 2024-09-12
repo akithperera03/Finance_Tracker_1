@@ -11,23 +11,23 @@ import java.util.List;
 
 @Service
 public class DashboardService {
-
-    private final TransactionRepository transactionRepository;
-
     @Autowired
-    public DashboardService(TransactionRepository transactionRepository) {
-        this.transactionRepository = transactionRepository;
-    }
+   TransactionRepository transactionRepository;
 
-    public BigDecimal getTotalIncome() {
-        return transactionRepository.findAll().stream()
+
+
+
+    public BigDecimal getTotalIncomeByUserId(Long userId) {
+        List<Transaction> transactions = transactionRepository.findByUserId(userId);
+        return transactions.stream()
                 .filter(transaction -> transaction.getType() == TransactionType.INCOME)
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal getTotalExpenses() {
-        return transactionRepository.findAll().stream()
+    public BigDecimal getTotalExpensesByUserId(Long userId) {
+        List<Transaction> transactions = transactionRepository.findByUserId(userId);
+        return transactions.stream()
                 .filter(transaction -> transaction.getType() == TransactionType.EXPENSE)
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
